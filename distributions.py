@@ -13,6 +13,12 @@ registration_duration_dist = np.random.exponential(scale=1.0, size=N)
 
 appointment_duration_dist = np.random.gamma(shape=2.0, scale=10.0, size=N)
 
+def time_to_minutes(val):
+    hours = int(val) // 100
+    minutes = int(val) % 100
+    return (hours - 9) * 60 + minutes
+
+
 # plt.hist(appointment_duration_dist, bins=50, density=True)
 # plt.show()
 
