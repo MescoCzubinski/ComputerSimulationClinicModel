@@ -3,11 +3,12 @@ import distributions
 
 
 class SimulationResult:
-    def __init__(self, avg_time, idle_time, patient_times, idle_times):
-        self.avg_time = avg_time             # avg patient wait time (total visit)
-        self.idle_time = idle_time           # combined doctors idle time
-        self.patient_times = patient_times   # patient wait times (total visit)
-        self.idle_times = idle_times         # doctor idle times
+    def __init__(self, avg_time, idle_time, patient_times, patient_times_wait, idle_times):
+        self.avg_time = avg_time                        # avg patient wait time (total visit)
+        self.idle_time = idle_time                      # combined doctors idle time
+        self.patient_times_total = patient_times        # patient wait times (total visit)
+        self.patient_times_wait = patient_times_wait    # patient wait times (for appointment)
+        self.idle_times = idle_times                    # doctor idle times
 
 
 class ClinicSimulation:
@@ -18,7 +19,8 @@ class ClinicSimulation:
         self.registration_free_at = np.zeros(num_registration_desks)
         self.doctor_free_at = np.zeros(num_doctors)
         self.doctor_idle_time = np.zeros(num_doctors)
-        self.patient_times = []
+        self.patient_times_total = []
+        self.patient_times_wait = []
 
 
     def run(self):
@@ -41,12 +43,14 @@ class ClinicSimulation:
 
             # Patient total time
             total_time = end_visit - arrival
-            self.patient_times.append(total_time)
+            self.patient_times_total.append(total_time)
+            self.patient_times_wait.append(start_visit  - end_reg)
 
-        avg_patient_time = np.mean(self.patient_times)
+
+        avg_patient_time = np.mean(self.patient_times_total)
         total_idle_time = np.sum(self.doctor_idle_time)
 
-        return SimulationResult(avg_patient_time, total_idle_time, self.patient_times, self.doctor_idle_time.tolist())
+        return SimulationResult(avg_patient_time, total_idle_time, self.patient_times_total, self.patient_times_wait, self.doctor_idle_time.tolist())
 
 
 def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):

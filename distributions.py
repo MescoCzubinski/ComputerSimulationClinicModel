@@ -75,9 +75,9 @@ def get_run_walk_in_patients(num_patients):
 # print(get_run_walk_in_patients(90))
 
 # avg pacients per doctor
-print(get_scheduled_patients(50, 3))
-print('----------------------------------------------------------')
-print(get_run_walk_in_patients(50))
+# print(get_scheduled_patients(50, 3))
+# print('----------------------------------------------------------')
+# print(get_run_walk_in_patients(50))
 
 # arrival offset distribution plot
 # plt.hist(get_arrival_offset(10000), bins=50, density=True)
