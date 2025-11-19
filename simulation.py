@@ -49,32 +49,16 @@ class ClinicSimulation:
         return SimulationResult(avg_patient_time, total_idle_time, self.patient_times, self.doctor_idle_time.tolist())
 
 
-def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patients=100, base_time=10):
-    # Set appointments every `base_time` mins
-    arrival_times = np.arange(0, num_patients * base_time, base_time)
-
-    patients = [
-        (
-            arrival_times[i],
-            max(1, np.random.choice(distributions.registration_duration_dist)),
-            max(1, np.random.choice(distributions.appointment_duration_dist))
-        )
-        for i in range(num_patients)
-    ]
+def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
+    patients = distributions.get_scheduled_patients(num_patients, num_doctors)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()
 
 
 def run_walk_in_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-    patients = [
-        (
-            max(0, distributions.time_to_minutes(np.random.choice(distributions.enter_time_dist))),
-            max(1, np.random.choice(distributions.registration_duration_dist)),
-            max(1, np.random.choice(distributions.appointment_duration_dist))
-        )
-        for _ in range(num_patients)
-    ]
+
+    patients = distributions.get_run_walk_in_patients(num_patients)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()
