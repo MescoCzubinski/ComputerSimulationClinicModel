@@ -57,7 +57,6 @@ def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patien
 
 
 def run_walk_in_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-
     patients = distributions.get_run_walk_in_patients(num_patients)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
