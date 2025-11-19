@@ -19,12 +19,23 @@ def get_walk_in_arrival_time_dist(num_patients):
     combined_dist = np.concatenate([dist_first_pic, dist_second_pic])
     return combined_dist[(combined_dist >= clinic_open_time) & (combined_dist <= clinic_close_time)]
 
-def get_scheduled_arrival_time_dist(num_patients, num_doctors):
-    avg_space_time = max(clinic_close_time // (num_patients // num_doctors), appointment_reserved_time)
+def get_arrival_offset(num_patients):
+    alpha=4
+    mean=-10
+    std=4
+    delta = alpha / np.sqrt(1 + alpha**2)
 
+    z0 = np.random.normal(0, 1, num_patients)
+    z1 = np.random.normal(0, 1, num_patients)
+
+    x = delta * np.abs(z0) + np.sqrt(1 - delta**2) * z1
+    
+    return mean + std * x
+
+def get_scheduled_arrival_time_dist(num_patients, num_doctors):
     appointment_times = []
     for i in range(num_patients):
-        appointment_times.append((i // num_doctors) * avg_space_time)
+        appointment_times.append((i // num_doctors) * appointment_reserved_time + np.random.choice(get_arrival_offset(num_patients)))
     return appointment_times
 
 def get_registration_duration_dist(num_patients, multiplier):
@@ -42,6 +53,7 @@ def get_scheduled_patients(num_patients, num_doctors):
         )
         for i in range(num_patients)
     ]
+    patients.sort(key=lambda x: x[0])
 
     return patients
 
@@ -54,7 +66,6 @@ def get_run_walk_in_patients(num_patients):
         )
         for _ in range(num_patients)
     ]
-
     patients.sort(key=lambda x: x[0])
     
     return patients
@@ -64,8 +75,13 @@ def get_run_walk_in_patients(num_patients):
 # print(get_run_walk_in_patients(90))
 
 # avg pacients per doctor
-# print(get_scheduled_patients(50, 3))
-# print(get_run_walk_in_patients(50))
+print(get_scheduled_patients(50, 3))
+print('----------------------------------------------------------')
+print(get_run_walk_in_patients(50))
+
+# arrival offset distribution plot
+# plt.hist(get_arrival_offset(10000), bins=50, density=True)
+# plt.show()
 
 # appointment duration distribution plot
 # plt.hist(get_appointment_duration_dist(1000), bins=50, density=True)
