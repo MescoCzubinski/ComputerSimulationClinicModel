@@ -1,6 +1,7 @@
 import numpy as np
 import distributions
 
+
 class SimulationResult:
     def __init__(self, avg_time, idle_time, patient_times, idle_times):
         self.avg_time = avg_time             # avg patient wait time (total visit)
