@@ -42,7 +42,7 @@ def print_stats(data, name = ""):
 def pprint(lst):
     print(list(map(float, lst)))
 
-def main():
+def main(num_runs=1000):
     """Wyświetla wyniki symulacji przychodni z terminami i bez."""
     # scheduled_result = sim.run_scheduled_simulation(3, 10, 300)
     # walk_in_result = sim.run_walk_in_simulation(3, 10, 300)
@@ -57,29 +57,32 @@ def main():
 
     # pprint(walk_in_result.patient_times_wait)
 
-    import cProfile as profile
-    import pstats
+    print("\nZ umawianym terminem:")    
 
-    with profile.Profile() as pr:    
-        print("\nZ umawianym terminem:")    
+    dataS = run_multiple_simulations(True, num_runs)
 
-        dataS = run_multiple_simulations(True, 100)
+    print("\nBez umawianego terminu:")
 
-        print("\nBez umawianego terminu:")
+    dataW = run_multiple_simulations(False, num_runs)
 
-        dataW = run_multiple_simulations(False, 100)
+    print("\nZ umawianym terminem:")    
+    print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
+    print_stats(dataS["idle"], "Bezczynność gabinetów")
+    
+    print("\nBez umawianego terminu:")
+    print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
+    print_stats(dataW["idle"], "Bezczynność gabinetów")
 
-        print("\nZ umawianym terminem:")    
-        print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
-        print_stats(dataS["idle"], "Bezczynność gabinetów")
-        
-        print("\nBez umawianego terminu:")
-        print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
-        print_stats(dataW["idle"], "Bezczynność gabinetów")
 
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.CUMULATIVE)
-    stats.print_stats()
 
 if __name__ == "__main__":
-    main()
+    # import cProfile as profile
+    # import pstats
+
+    # with profile.Profile() as pr:
+    #     main()
+    # stats = pstats.Stats(pr)
+    # stats.sort_stats(pstats.SortKey.CUMULATIVE)
+    # stats.print_stats()
+    np.random.seed(42)
+    main(100000)
