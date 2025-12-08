@@ -11,7 +11,7 @@ def run_multiple_simulations(
         runs=100,
         num_registration_desks=2,
         num_doctors=3,
-        num_patients=200,
+        num_patients=100,
 ):
     avg_times = []
     idle_total = []
