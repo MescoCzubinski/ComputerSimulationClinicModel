@@ -46,34 +46,33 @@ def pprint(lst):
 
 def main(num_runs=1000):
     """Wyświetla wyniki symulacji przychodni z terminami i bez."""
-    scheduled_result = sim.run_scheduled_simulation(2, 2, 100)
-    walk_in_result = sim.run_walk_in_simulation(2, 2, 100)
+    scheduled_result = sim.run_scheduled_simulation(2, 2, [(-7, 2, 18), (-3, 4, 10), (9, 2, 24), (10, 1, 12), (34, 1, 19)])
+    walk_in_result = sim.run_walk_in_simulation(2, 2, [(171, 1, 23), (259, 1, 15), (418, 1, 15), (472, 2, 19), (533, 3, 17)])
 
     print("Z umawianym terminem:")
     print(scheduled_result.idle_times, scheduled_result.avg_time)
-    print(len(scheduled_result.patient_times_wait))
     pprint(scheduled_result.patient_times_total)
     
     print("\nBez umawiania terminu:")
     print(walk_in_result.idle_times, walk_in_result.avg_time)
-    print(len(walk_in_result.patient_times_wait))
     pprint(walk_in_result.patient_times_total)    
 
-    # print("\nZ umawianym terminem:")    
+    """Testy statystyczne"""
+    print("\nZ umawianym terminem:")    
 
-    # dataS = run_multiple_simulations(True, num_runs)
+    dataS = run_multiple_simulations(True, num_runs)
 
-    # print("\nBez umawianego terminu:")
+    print("\nBez umawianego terminu:")
 
-    # dataW = run_multiple_simulations(False, num_runs)
+    dataW = run_multiple_simulations(False, num_runs)
 
-    # print("\nZ umawianym terminem:")    
-    # print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
-    # print_stats(dataS["idle"], "Bezczynność gabinetów")
+    print("\nZ umawianym terminem:")    
+    print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
+    print_stats(dataS["idle"], "Bezczynność gabinetów")
     
-    # print("\nBez umawianego terminu:")
-    # print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
-    # print_stats(dataW["idle"], "Bezczynność gabinetów")
+    print("\nBez umawianego terminu:")
+    print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
+    print_stats(dataW["idle"], "Bezczynność gabinetów")
 
 
 
