@@ -8,10 +8,10 @@ import simulation as sim
 
 def run_multiple_simulations(
         isScheduled=True,
-        runs=50,
+        runs=100,
         num_registration_desks=2,
         num_doctors=3,
-        num_patients=100,
+        num_patients=200,
 ):
     avg_times = []
     idle_total = []
