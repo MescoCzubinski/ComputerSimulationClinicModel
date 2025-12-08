@@ -1,3 +1,6 @@
+"""
+Moduł definiujący rozkłady statystyczne używane w symulacji.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -13,6 +16,18 @@ run_walk_in_registration_time_multiplier = 1.5  # walk-in patients take longer a
 
 
 def get_walk_in_arrival_time_dist(num_patients, p_first=0.5):
+    """Zwraca czasy przyjścia pacjentów bez umówionego terminu.
+
+    Czasy są próbkowane z dwumodalnego rozkładu normalnego (piki ok. 9:00 i 14:00). 
+    Wyniki są odrzucane, jeśli wypadają poza czasem pracy przychodni.
+
+    Args:
+        num_patients: Liczba pacjentów.
+        p_first: Prawdopodobieństwo przypisania do pierwszej (porannej) mody.
+
+    Returns:
+        np.ndarray: Tablica minut od otwarcia przychodni dla każdego pacjenta.
+    """
     mus = np.array([120, 420])
     sigmas = np.array([90, 90])
 
@@ -33,6 +48,18 @@ def get_walk_in_arrival_time_dist(num_patients, p_first=0.5):
 
 
 def get_arrival_offset(num_patients):
+    """Generuje przesunięcia czasów przyjścia dla pacjentów umówionych.
+
+    Zastosowano asymetryczny rozkład normalny z oczekiwaniem -10 minut,
+    co pozwala odzwierciedlić tendencję pacjentów do przychodzenia przed
+    czasem, z prawostronnym ogonem.
+
+    Args:
+        num_patients: Liczba pacjentów.
+
+    Returns:
+        np.ndarray: Tablica przesunięć (w minutach) względem terminu wizyty.
+    """
     alpha = 4
     mean = -10
     std = 4
@@ -47,6 +74,18 @@ def get_arrival_offset(num_patients):
 
 
 def get_scheduled_arrival_time_dist(num_patients, num_doctors):
+    """Zwraca czasy przyjścia pacjentów z umówionymi wizytami.
+
+    Wizyty rezerwowane są co 20 minut na gabinet, a każde losowanie
+    otrzymuje przesunięcie wygenerowane przez `get_arrival_offset`.
+
+    Args:
+        num_patients: Liczba pacjentów.
+        num_doctors: Liczba gabinetów/lekarzy.
+
+    Returns:
+        list[int]: Posortowana lista minut od otwarcia dla każdego pacjenta.
+    """
     offsets = get_arrival_offset(num_patients)
     return [
         (i // num_doctors) * appointment_reserved_time + offsets[i]
@@ -55,14 +94,46 @@ def get_scheduled_arrival_time_dist(num_patients, num_doctors):
 
 
 def get_registration_duration_dist(num_patients, multiplier):
+    """Losuje czas obsługi w rejestracji.
+
+    Rozkład wykładniczy mnożony przez podany współczynnik pozwala
+    odróżnić pacjentów umówionych od niezapowiedzianych.
+
+    Args:
+        num_patients: Liczba pacjentów.
+        multiplier: Współczynnik skalujący czas rejestracji.
+
+    Returns:
+        np.ndarray: Tablica czasów rejestracji w minutach.
+    """
     return (np.random.exponential(scale=1.0, size=num_patients) * multiplier) + 1
 
 
 def get_appointment_duration_dist(num_patients):
+    """Losuje czas wizyty lekarskiej z rozkładu gamma.
+
+    Args:
+        num_patients: Liczba pacjentów.
+
+    Returns:
+        np.ndarray: Tablica czasów trwania wizyt w minutach.
+    """
     return np.random.gamma(shape=average_appointment_duration, scale=1, size=num_patients) + 1
 
 
 def get_scheduled_patients(num_patients, num_doctors):
+    """Buduje listę pacjentów z umówionym terminem.
+
+    Zwraca krotki z czasem przyjścia, czasem rejestracji i czasem wizyty,
+    posortowane po przybyciu.
+
+    Args:
+        num_patients: Liczba pacjentów.
+        num_doctors: Liczba gabinetów/lekarzy.
+
+    Returns:
+        list[tuple[int, int, int]]: Posortowana lista parametrów pacjentów.
+    """
     arrivals = get_scheduled_arrival_time_dist(num_patients, num_doctors)
     registrations = get_registration_duration_dist(num_patients, scheduled_registration_time_multiplier)
     appointments = get_appointment_duration_dist(num_patients)
@@ -77,6 +148,14 @@ def get_scheduled_patients(num_patients, num_doctors):
 
 
 def get_run_walk_in_patients(num_patients):
+    """Buduje listę pacjentów przychodzących bez zapisu.
+
+    Args:
+        num_patients: Liczba pacjentów.
+
+    Returns:
+        list[tuple[int, int, int]]: Posortowana lista parametrów pacjentów.
+    """
     arrivals = get_walk_in_arrival_time_dist(num_patients)
     registrations = get_registration_duration_dist(num_patients, run_walk_in_registration_time_multiplier)
     appointments = get_appointment_duration_dist(num_patients)
