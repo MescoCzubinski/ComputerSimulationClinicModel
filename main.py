@@ -7,7 +7,7 @@ def run_multiple_simulations(
         runs=100,
         num_registration_desks=2,
         num_doctors=3,
-        num_patients=100,
+        num_patients=500,
 ):
     avg_times = []
     idle_total = []
@@ -46,34 +46,34 @@ def pprint(lst):
 
 def main(num_runs=1000):
     """Wyświetla wyniki symulacji przychodni z terminami i bez."""
-    # scheduled_result = sim.run_scheduled_simulation(3, 10, 300)
-    # walk_in_result = sim.run_walk_in_simulation(3, 10, 300)
-    # scheduled_result = sim.run_scheduled_simulation()
-    # walk_in_result = sim.run_walk_in_simulation()
+    scheduled_result = sim.run_scheduled_simulation(2, 2, 100)
+    walk_in_result = sim.run_walk_in_simulation(2, 2, 100)
 
-    # print("Z umawianym terminem:")
-    # print(scheduled_result.idle_times, scheduled_result.avg_time)
+    print("Z umawianym terminem:")
+    print(scheduled_result.idle_times, scheduled_result.avg_time)
+    print(len(scheduled_result.patient_times_wait))
+    pprint(scheduled_result.patient_times_total)
     
-    # print("\nBez umawiania terminu:")
-    # print(walk_in_result.idle_times, walk_in_result.avg_time)
+    print("\nBez umawiania terminu:")
+    print(walk_in_result.idle_times, walk_in_result.avg_time)
+    print(len(walk_in_result.patient_times_wait))
+    pprint(walk_in_result.patient_times_total)    
 
-    # pprint(walk_in_result.patient_times_wait)
+    # print("\nZ umawianym terminem:")    
 
-    print("\nZ umawianym terminem:")    
+    # dataS = run_multiple_simulations(True, num_runs)
 
-    dataS = run_multiple_simulations(True, num_runs)
+    # print("\nBez umawianego terminu:")
 
-    print("\nBez umawianego terminu:")
+    # dataW = run_multiple_simulations(False, num_runs)
 
-    dataW = run_multiple_simulations(False, num_runs)
-
-    print("\nZ umawianym terminem:")    
-    print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
-    print_stats(dataS["idle"], "Bezczynność gabinetów")
+    # print("\nZ umawianym terminem:")    
+    # print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
+    # print_stats(dataS["idle"], "Bezczynność gabinetów")
     
-    print("\nBez umawianego terminu:")
-    print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
-    print_stats(dataW["idle"], "Bezczynność gabinetów")
+    # print("\nBez umawianego terminu:")
+    # print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
+    # print_stats(dataW["idle"], "Bezczynność gabinetów")
 
 
 
@@ -87,4 +87,4 @@ if __name__ == "__main__":
     # stats.sort_stats(pstats.SortKey.CUMULATIVE)
     # stats.print_stats()
     np.random.seed(42)
-    main(100000)
+    main(100)

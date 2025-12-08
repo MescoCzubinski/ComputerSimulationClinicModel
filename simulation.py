@@ -68,11 +68,10 @@ class ClinicSimulation:
         """
         for arrival, reg_dur, visit_dur in self.patients:
             # If patient arrives before clinic opens
+            pre_wait = 0
             if arrival < dist.clinic_open_time:
-                wait_extra = dist.clinic_open_time - arrival
+                pre_wait = dist.clinic_open_time - arrival
                 arrival = dist.clinic_open_time
-                self.patient_times_wait.append(wait_extra)
-                self.patient_times_total.append(wait_extra)
 
             # Registration
             reg_idx = np.argmin(self.registration_free_at)
@@ -88,12 +87,12 @@ class ClinicSimulation:
 
             start_visit = max(end_reg, self.doctor_free_at[doc_idx])
             end_visit = start_visit + visit_dur
-            self.doctor_free_at[doc_idx] = end_visit
+            self.doctor_free_at[doc_idx] = end_visit + 1
 
             # Patient total time
-            total_time = end_visit - arrival
+            total_time = end_visit - arrival + pre_wait
             self.patient_times_total.append(total_time)
-            self.patient_times_wait.append(start_visit  - end_reg)
+            self.patient_times_wait.append(start_visit  - end_reg + pre_wait)
 
 
         avg_patient_time = np.mean(self.patient_times_total)
