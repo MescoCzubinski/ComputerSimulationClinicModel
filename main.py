@@ -1,4 +1,3 @@
-import distributions
 import simulation as sim
 
 import numpy as np
