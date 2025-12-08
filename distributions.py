@@ -14,7 +14,7 @@ run_walk_in_registration_time_multiplier = 1.5  # walk-in patients take longer a
 
 def get_walk_in_arrival_time_dist(num_patients, p_first=0.5):
     mus = np.array([120, 420])
-    sigmas = np.array([120, 120])
+    sigmas = np.array([90, 90])
 
     comp_is_second = np.random.rand(num_patients) > p_first
     locs = mus[comp_is_second.astype(int)]
@@ -91,6 +91,8 @@ def get_run_walk_in_patients(num_patients):
 
 if __name__ == "__main__":
     
+    np.random.seed(42)
+
     sample_size = 1000000
 
     print("max patients per doctor case:")
