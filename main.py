@@ -37,6 +37,8 @@ def print_stats(data, name = ""):
     print("Max:", np.max(data))
     print("Percentyl 90%:", np.percentile(data, 90))
     print("Percentyl 95%:", np.percentile(data, 95))
+    print("Percentyl 10%:", np.percentile(data, 10))
+    print("Percentyl 5%:", np.percentile(data, 5))
 
 
 def pprint(lst):
@@ -63,11 +65,11 @@ def main():
     with profile.Profile() as pr:    
         print("\nZ umawianym terminem:")    
 
-        dataS = run_multiple_simulations(True, 100)
+        dataS = run_multiple_simulations(True, 10000)
 
         print("\nBez umawianego terminu:")
 
-        dataW = run_multiple_simulations(False, 100)
+        dataW = run_multiple_simulations(False, 10000)
 
         print("\nZ umawianym terminem:")    
         print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
