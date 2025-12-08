@@ -84,21 +84,27 @@ def print_stats(data, name = ""):
     print("Percentyl 95%:", np.percentile(data, 95))
 
 
-def pprint(lst):
+def list_pprint(lst):
+    """
+    Funkcja pomocnicza do czytelnego wypisywania liczb.
+    Args:
+        lst (list): Lista liczb do wypisania.
+    """
     print(list(map(float, lst)))
 
 def main():
+    """Wyświetla wyniki symulacji przychodni z terminami i bez."""
+    scheduled_result = sim.run_scheduled_simulation(3, 10, 300)
+    walk_in_result = sim.run_walk_in_simulation(3, 10, 300)
     scheduled_result = sim.run_scheduled_simulation()
     walk_in_result = sim.run_walk_in_simulation()
 
-    print("\nZ umawianym terminem:")
+    print("Z umawianym terminem:")
     print(scheduled_result.idle_times, scheduled_result.avg_time)
     
-    print("Bez umawiania terminu:")
+    print("\nBez umawiania terminu:")
     print(walk_in_result.idle_times, walk_in_result.avg_time)
 
-    print(scheduled_result.patient_times_wait)
-    print(walk_in_result.patient_times_wait)
     pprint(walk_in_result.patient_times_wait)
 
 

@@ -8,7 +8,7 @@ porównanie dwóch sposobów organizacji przychodni
 
 3. Parametry:
 Deterministyczne:
-- Liczba okienek rejestracji (int, 0-3)
+- Liczba okienek rejestracji (int, 1-3)
 - Liczba gabinetów (int, 1-10)
 - Liczbę pacjentów (int, 1-300)
 
