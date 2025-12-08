@@ -1,5 +1,5 @@
 import numpy as np
-import distributions
+import distributions as dist
 
 
 class SimulationResult:
@@ -25,6 +25,13 @@ class ClinicSimulation:
 
     def run(self):
         for arrival, reg_dur, visit_dur in self.patients:
+            # If patient arrives before clinic opens
+            if arrival < dist.clinic_open_time:
+                wait_extra = dist.clinic_open_time - arrival
+                arrival = dist.clinic_open_time
+                self.patient_times_wait.append(wait_extra)
+                self.patient_times_total.append(wait_extra)
+
             # Registration
             reg_idx = np.argmin(self.registration_free_at)
             start_reg = max(arrival, self.registration_free_at[reg_idx])
@@ -54,14 +61,14 @@ class ClinicSimulation:
 
 
 def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-    patients = distributions.get_scheduled_patients(num_patients, num_doctors)
+    patients = dist.get_scheduled_patients(num_patients, num_doctors)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()
 
 
 def run_walk_in_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-    patients = distributions.get_run_walk_in_patients(num_patients)
+    patients =  dist.get_run_walk_in_patients(num_patients)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()
