@@ -114,16 +114,25 @@ def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, patients=1
         SimulationResult: Wyniki symulacji.
     """
     if not isinstance(patients, list):
-        patients = distributions.get_scheduled_patients(patients, num_doctors)
-def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-    patients = dist.get_scheduled_patients(num_patients, num_doctors)
+        patients = dist.get_scheduled_patients(patients, num_doctors)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()
 
 
-def run_walk_in_simulation(num_registration_desks=2, num_doctors=3, num_patients=100):
-    patients = distributions.get_run_walk_in_patients(num_patients)
+def run_walk_in_simulation(num_registration_desks=2, num_doctors=3, patients=100):
+    """Uruchamia symulację dla pacjentów bez umówionego terminu.
+
+    Args:
+        num_registration_desks: Liczba okienek rejestracji.
+        num_doctors: Liczba gabinetów/lekarzy.
+        patients: Liczba pacjentów lub gotowa lista .
+
+    Returns:
+        SimulationResult: Wyniki symulacji.
+    """
+    if not isinstance(patients, list):
+        patients = dist.get_run_walk_in_patients(patients)
 
     sim = ClinicSimulation(num_registration_desks, num_doctors, patients)
     return sim.run()

@@ -1,9 +1,6 @@
-import simulation as sim
-
 import numpy as np
 import matplotlib.pyplot as plt
 import simulation as sim
-
 
 def run_multiple_simulations(
         isScheduled=True,
@@ -42,54 +39,7 @@ def print_stats(data, name = ""):
     print("Percentyl 95%:", np.percentile(data, 95))
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-import simulation as sim
-
-
-def run_multiple_simulations(
-        isScheduled=True,
-        runs=50,
-        num_registration_desks=2,
-        num_doctors=3,
-        num_patients=100,
-):
-    avg_times = []
-    idle_total = []
-
-    for i in range(runs):
-        if isScheduled:
-            result = sim.run_scheduled_simulation(num_registration_desks, num_doctors, num_patients)
-        else:
-            result = sim.run_walk_in_simulation(num_registration_desks, num_doctors, num_patients)
-
-        avg_times.append(result.avg_time)
-        idle_total.append(result.idle_time)
-        print(str(int(i/runs * 100)) + "%")
-
-    return {
-        "avg_times": np.array(avg_times),
-        "idle": np.array(idle_total)
-    }
-
-
-def print_stats(data, name = ""):
-    print("\n==== STATYSTYKI DLA ", name, " ====")
-    print("Średnia:", np.mean(data))
-    print("Mediana:", np.median(data))
-    print("Odchylenie std:", np.std(data))
-    print("Min:", np.min(data))
-    print("Max:", np.max(data))
-    print("Percentyl 90%:", np.percentile(data, 90))
-    print("Percentyl 95%:", np.percentile(data, 95))
-
-
-def list_pprint(lst):
-    """
-    Funkcja pomocnicza do czytelnego wypisywania liczb.
-    Args:
-        lst (list): Lista liczb do wypisania.
-    """
+def pprint(lst):
     print(list(map(float, lst)))
 
 def main():
