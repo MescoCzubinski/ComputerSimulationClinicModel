@@ -1,7 +1,7 @@
 # Dokumentacja projektu przychodni
 
 ## Struktura plików
-- `distributions.py` – generowanie rozkładów czasów przyjścia, rejestracji i wizyt oraz list pacjentóœ.
+- `distributions.py` – generowanie rozkładów czasów przyjścia, rejestracji i wizyt oraz list pacjentów.
 - `simulation.py` – rdzeń symulacji przepływu pacjentów oraz funkcje uruchamiające scenariusze.
 - `main.py` – prosty punkt wejścia wypisujący winiki obu wariantów przychodni.
 

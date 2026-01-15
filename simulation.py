@@ -1,4 +1,4 @@
-""""
+"""
 Moduł symulujący działanie przychodni medycznej z rejestracją i gabinetami lekarskimi.
 """
 import numpy as np
