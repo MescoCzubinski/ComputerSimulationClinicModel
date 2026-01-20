@@ -5,3 +5,4 @@ pycache/*
 .env
 .venv
 *.pyc
+.idea

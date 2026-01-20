@@ -7,7 +7,7 @@ def run_multiple_simulations(
         runs=100,
         num_registration_desks=2,
         num_doctors=3,
-        num_patients=500,
+        num_patients=85,
 ):
     avg_times = []
     idle_total = []
@@ -77,13 +77,5 @@ def main(num_runs=1000):
 
 
 if __name__ == "__main__":
-    # import cProfile as profile
-    # import pstats
-
-    # with profile.Profile() as pr:
-    #     main()
-    # stats = pstats.Stats(pr)
-    # stats.sort_stats(pstats.SortKey.CUMULATIVE)
-    # stats.print_stats()
     np.random.seed(42)
     main(100)

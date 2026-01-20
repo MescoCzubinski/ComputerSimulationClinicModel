@@ -14,14 +14,16 @@ class SimulationResult:
         patient_times_total: Lista całkowitych czasów pobytu pacjentów.
         patient_times_wait: Lista czasów oczekiwania w kolejce do lekarza.
         idle_times: Lista czasów bezczynności dla każdego lekarza.
+        overtime: Łączny czas pracy która przychodnia potrzebowała by na obsłużenie wszystkich po zamknięciu.
     """
 
-    def __init__(self, avg_time, idle_time, patient_times, patient_times_wait, idle_times):
-        self.avg_time = avg_time                        # avg patient wait time (total visit)
-        self.idle_time = idle_time                      # combined doctors idle time
-        self.patient_times_total = patient_times        # patient wait times (total visit)
-        self.patient_times_wait = patient_times_wait    # patient wait times (for appointment)
-        self.idle_times = idle_times                    # doctor idle times
+    def __init__(self, avg_time, idle_time, patient_times, patient_times_wait, idle_times, overtime):
+        self.avg_time = avg_time
+        self.idle_time = idle_time
+        self.patient_times_total = patient_times
+        self.patient_times_wait = patient_times_wait
+        self.idle_times = idle_times
+        self.overtime = overtime
 
 
 class ClinicSimulation:
@@ -94,11 +96,26 @@ class ClinicSimulation:
             self.patient_times_total.append(total_time)
             self.patient_times_wait.append(start_visit  - end_reg + pre_wait)
 
+        for i in range(self.num_doctors):
+            if self.doctor_free_at[i] < dist.clinic_close_time:
+                self.doctor_idle_time[i] += (
+                    dist.clinic_close_time - self.doctor_free_at[i]
+                )
+        
+        last_finish_time = max(self.doctor_free_at)
+        overtime = last_finish_time - dist.clinic_close_time 
 
         avg_patient_time = np.mean(self.patient_times_total)
         total_idle_time = np.sum(self.doctor_idle_time)
 
-        return SimulationResult(avg_patient_time, total_idle_time, self.patient_times_total, self.patient_times_wait, self.doctor_idle_time.tolist())
+        return SimulationResult(
+            avg_patient_time,
+            total_idle_time,
+            self.patient_times_total,
+            self.patient_times_wait,
+            self.doctor_idle_time.tolist(),
+            overtime
+        )
 
 
 def run_scheduled_simulation(num_registration_desks=2, num_doctors=3, patients=100):
