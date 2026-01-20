@@ -173,7 +173,6 @@ def create_comparison_plots(data_scheduled, data_walk_in):
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    # Histogramy średnich czasów pacjentów
     create_histogram_plot(
         data_scheduled["avg_times"], 
         data_walk_in["avg_times"],
@@ -182,7 +181,6 @@ def create_comparison_plots(data_scheduled, data_walk_in):
         'comparison_avg_patient_time.png'
     )
     
-    # Histogramy nadgodzin
     create_histogram_plot(
         data_scheduled["overtimes"], 
         data_walk_in["overtimes"],
@@ -191,8 +189,7 @@ def create_comparison_plots(data_scheduled, data_walk_in):
         'comparison_overtime.png',
         add_zero_line=True
     )
-    
-    # Boxploty porównawcze
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
     
     ax1.boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], 
@@ -434,7 +431,6 @@ def run_full_analysis(
     print(f"  - Liczba pacjentów: {num_patients}")
     print()
     
-    # Zbieranie surowych danych
     print("\n[1/7] Przeprowadzanie symulacji z umawianym terminem...")
     data_scheduled = run_multiple_simulations(
         is_scheduled=True,
@@ -453,7 +449,6 @@ def run_full_analysis(
         num_patients=num_patients
     )
     
-    # Obliczanie statystyk
     print("\n[3/7] Obliczanie statystyk...")
     
     stats_list = [
@@ -465,7 +460,6 @@ def run_full_analysis(
     
     stats_df = pd.DataFrame(stats_list)
     
-    # Testy statystyczne Z
     print("\n[4/7] Przeprowadzanie testów Z...")
     
     z_test_patient_time = z_test(
@@ -483,8 +477,7 @@ def run_full_analysis(
         {"Metryka": "Średni czas pacjenta", **z_test_patient_time},
         {"Metryka": "Nadgodziny", **z_test_overtime}
     ])
-    
-    # Przygotowanie tabel
+
     aggregated_df = pd.DataFrame({
         "System": ["Z terminem", "Bez terminu"],
         "Średni czas pacjenta (min)": [
@@ -515,7 +508,6 @@ def run_full_analysis(
         "Nadgodziny": list(data_scheduled["overtimes"]) + list(data_walk_in["overtimes"])
     })
     
-    # Zapisywanie wyników
     print("\n[5/7] Zapisywanie wyników do plików CSV...")
     
     stats_df.to_csv(os.path.join(OUTPUT_DIR, "statystyki_opisowe.csv"), index=False, float_format='%.3f')
@@ -529,16 +521,13 @@ def run_full_analysis(
     print("  - dane_zagregowane.csv")
     print("  - dane_surowe.csv")
     
-    # Tworzenie wykresów
     print("\n[6/7] Generowanie wykresów porównawczych...")
     create_comparison_plots(data_scheduled, data_walk_in)
     
-    # Analiza wpływu parametrów
     print("\n[7/7] Przeprowadzanie analiz wpływu parametrów...")
     run_parameter_sweep_patients(num_runs, patients_range, num_registration_desks, num_doctors)
     run_parameter_sweep_doctors(num_runs, doctors_range, num_registration_desks, num_patients)
     
-    # Wyświetlanie podsumowania
     print("\n" + "=" * 70)
     print("PODSUMOWANIE WYNIKÓW")
     print("=" * 70)
@@ -555,8 +544,7 @@ def run_full_analysis(
     print("\n" + "=" * 70)
     print("WNIOSKI:")
     print("=" * 70)
-    
-    # Automatyczne wnioski
+
     if z_test_patient_time["Wartość p"] < 0.05:
         diff = z_test_patient_time["Różnica średnich"]
         winner = "Z terminem" if diff < 0 else "Bez terminu"
@@ -587,7 +575,6 @@ def run_full_analysis(
 if __name__ == "__main__":
     np.random.seed(42)
     
-    # Pełna analiza z wpływem parametrów
     run_full_analysis(
         num_runs=100,
         num_registration_desks=2,
