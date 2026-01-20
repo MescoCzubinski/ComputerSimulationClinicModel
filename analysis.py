@@ -10,7 +10,6 @@ import os
 
 OUTPUT_DIR = "results"
 
-
 def run_multiple_simulations(
         is_scheduled=True,
         runs=100,
@@ -35,6 +34,7 @@ def run_multiple_simulations(
     """
     avg_times = []
     overtimes = []
+    idle_times = []
 
     for i in range(runs):
         if is_scheduled:
@@ -48,13 +48,15 @@ def run_multiple_simulations(
 
         avg_times.append(result.avg_time)
         overtimes.append(result.overtime)
+        idle_times.append(result.idle_time)
         
         if verbose and (i + 1) % 10 == 0:
             print(f"Postęp: {int((i + 1) / runs * 100)}%", end='\r')
 
     return {
         "avg_times": np.array(avg_times),
-        "overtimes": np.array(overtimes)
+        "overtimes": np.array(overtimes),
+        "idle_times": np.array(idle_times)
     }
 
 
@@ -189,21 +191,37 @@ def create_comparison_plots(data_scheduled, data_walk_in):
         'comparison_overtime.png',
         add_zero_line=True
     )
+    
+    create_histogram_plot(
+        data_scheduled["idle_times"], 
+        data_walk_in["idle_times"],
+        'Czas bezczynności (minuty)',
+        'Czas bezczynności',
+        'comparison_idle_time.png',
+        color1='blue',
+        color2='green'
+    )
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     
-    ax1.boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], 
-                labels=['Z terminem', 'Bez terminu'])
-    ax1.set_ylabel('Średni czas pacjenta (minuty)')
-    ax1.set_title('Porównanie średniego czasu pacjenta')
-    ax1.grid(True, alpha=0.3, axis='y')
+    axes[0].boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], 
+                    labels=['Z terminem', 'Bez terminu'])
+    axes[0].set_ylabel('Średni czas pacjenta (minuty)')
+    axes[0].set_title('Porównanie średniego czasu pacjenta')
+    axes[0].grid(True, alpha=0.3, axis='y')
     
-    ax2.boxplot([data_scheduled["overtimes"], data_walk_in["overtimes"]], 
-                labels=['Z terminem', 'Bez terminu'])
-    ax2.axhline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
-    ax2.set_ylabel('Nadgodziny (minuty)')
-    ax2.set_title('Porównanie nadgodzin')
-    ax2.grid(True, alpha=0.3, axis='y')
+    axes[1].boxplot([data_scheduled["overtimes"], data_walk_in["overtimes"]], 
+                    labels=['Z terminem', 'Bez terminu'])
+    axes[1].axhline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
+    axes[1].set_ylabel('Nadgodziny (minuty)')
+    axes[1].set_title('Porównanie nadgodzin')
+    axes[1].grid(True, alpha=0.3, axis='y')
+    
+    axes[2].boxplot([data_scheduled["idle_times"], data_walk_in["idle_times"]], 
+                    labels=['Z terminem', 'Bez terminu'])
+    axes[2].set_ylabel('Czas bezczynności (minuty)')
+    axes[2].set_title('Porównanie czasu bezczynności')
+    axes[2].grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'comparison_boxplots.png'), dpi=300, bbox_inches='tight')
@@ -222,27 +240,35 @@ def create_parameter_analysis_plots(results_df, filename='parameter_analysis_pat
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     
     for system in results_df['System'].unique():
         data = results_df[results_df['System'] == system]
-        ax1.plot(data['num_patients'], data['Średni czas pacjenta (min)'], 
-                marker='o', label=system, linewidth=2, markersize=6)
-        ax2.plot(data['num_patients'], data['Nadgodziny (min)'], 
-                marker='o', label=system, linewidth=2, markersize=6)
+        axes[0].plot(data['num_patients'], data['Średni czas pacjenta (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
+        axes[1].plot(data['num_patients'], data['Nadgodziny (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
+        axes[2].plot(data['num_patients'], data['Czas bezczynności (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
     
-    ax1.set_xlabel('Liczba pacjentów')
-    ax1.set_ylabel('Średni czas pacjenta (minuty)')
-    ax1.set_title('Wpływ liczby pacjentów na czas pacjenta (num_doctors=5)')
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
+    axes[0].set_xlabel('Liczba pacjentów')
+    axes[0].set_ylabel('Średni czas pacjenta (minuty)')
+    axes[0].set_title('Wpływ liczby pacjentów na czas pacjenta (num_doctors=5)')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
     
-    ax2.set_xlabel('Liczba pacjentów')
-    ax2.set_ylabel('Nadgodziny (minuty)')
-    ax2.set_title('Wpływ liczby pacjentów na nadgodziny (num_doctors=5)')
-    ax2.axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
+    axes[1].set_xlabel('Liczba pacjentów')
+    axes[1].set_ylabel('Nadgodziny (minuty)')
+    axes[1].set_title('Wpływ liczby pacjentów na nadgodziny (num_doctors=5)')
+    axes[1].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
+    axes[1].legend()
+    axes[1].grid(True, alpha=0.3)
+    
+    axes[2].set_xlabel('Liczba pacjentów')
+    axes[2].set_ylabel('Czas bezczynności (minuty)')
+    axes[2].set_title('Wpływ liczby pacjentów na czas bezczynności (num_doctors=5)')
+    axes[2].legend()
+    axes[2].grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300, bbox_inches='tight')
@@ -260,27 +286,35 @@ def create_doctors_analysis_plots(results_df):
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     
     for system in results_df['System'].unique():
         data = results_df[results_df['System'] == system]
-        ax1.plot(data['num_doctors'], data['Średni czas pacjenta (min)'], 
-                marker='o', label=system, linewidth=2, markersize=6)
-        ax2.plot(data['num_doctors'], data['Nadgodziny (min)'], 
-                marker='o', label=system, linewidth=2, markersize=6)
+        axes[0].plot(data['num_doctors'], data['Średni czas pacjenta (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
+        axes[1].plot(data['num_doctors'], data['Nadgodziny (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
+        axes[2].plot(data['num_doctors'], data['Czas bezczynności (min)'], 
+                    marker='o', label=system, linewidth=2, markersize=6)
     
-    ax1.set_xlabel('Liczba gabinetów')
-    ax1.set_ylabel('Średni czas pacjenta (minuty)')
-    ax1.set_title('Wpływ liczby gabinetów na czas pacjenta (num_patients=150)')
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
+    axes[0].set_xlabel('Liczba gabinetów')
+    axes[0].set_ylabel('Średni czas pacjenta (minuty)')
+    axes[0].set_title('Wpływ liczby gabinetów na czas pacjenta (num_patients=150)')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
     
-    ax2.set_xlabel('Liczba gabinetów')
-    ax2.set_ylabel('Nadgodziny (minuty)')
-    ax2.set_title('Wpływ liczby gabinetów na nadgodziny (num_patients=150)')
-    ax2.axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
+    axes[1].set_xlabel('Liczba gabinetów')
+    axes[1].set_ylabel('Nadgodziny (minuty)')
+    axes[1].set_title('Wpływ liczby gabinetów na nadgodziny (num_patients=150)')
+    axes[1].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
+    axes[1].legend()
+    axes[1].grid(True, alpha=0.3)
+    
+    axes[2].set_xlabel('Liczba gabinetów')
+    axes[2].set_ylabel('Czas bezczynności (minuty)')
+    axes[2].set_title('Wpływ liczby gabinetów na czas bezczynności (num_patients=150)')
+    axes[2].legend()
+    axes[2].grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'parameter_analysis_doctors.png'), dpi=300, bbox_inches='tight')
@@ -331,8 +365,10 @@ def run_parameter_sweep_patients(num_runs, patients_range, num_registration_desk
                 "System": system_name,
                 "Średni czas pacjenta (min)": np.mean(data["avg_times"]),
                 "Nadgodziny (min)": np.mean(data["overtimes"]),
+                "Czas bezczynności (min)": np.mean(data["idle_times"]),
                 "Std czas pacjenta": np.std(data["avg_times"]),
-                "Std nadgodziny": np.std(data["overtimes"])
+                "Std nadgodziny": np.std(data["overtimes"]),
+                "Std czas bezczynności": np.std(data["idle_times"])
             })
     
     results_df = pd.DataFrame(results)
@@ -387,8 +423,10 @@ def run_parameter_sweep_doctors(num_runs, doctors_range, num_registration_desks,
                 "System": system_name,
                 "Średni czas pacjenta (min)": np.mean(data["avg_times"]),
                 "Nadgodziny (min)": np.mean(data["overtimes"]),
+                "Czas bezczynności (min)": np.mean(data["idle_times"]),
                 "Std czas pacjenta": np.std(data["avg_times"]),
-                "Std nadgodziny": np.std(data["overtimes"])
+                "Std nadgodziny": np.std(data["overtimes"]),
+                "Std czas bezczynności": np.std(data["idle_times"])
             })
     
     results_df = pd.DataFrame(results)
@@ -454,8 +492,10 @@ def run_full_analysis(
     stats_list = [
         calculate_statistics(data_scheduled["avg_times"], "Średni czas pacjenta - Z terminem"),
         calculate_statistics(data_scheduled["overtimes"], "Nadgodziny - Z terminem"),
+        calculate_statistics(data_scheduled["idle_times"], "Czas bezczynności - Z terminem"),
         calculate_statistics(data_walk_in["avg_times"], "Średni czas pacjenta - Bez terminu"),
-        calculate_statistics(data_walk_in["overtimes"], "Nadgodziny - Bez terminu")
+        calculate_statistics(data_walk_in["overtimes"], "Nadgodziny - Bez terminu"),
+        calculate_statistics(data_walk_in["idle_times"], "Czas bezczynności - Bez terminu")
     ]
     
     stats_df = pd.DataFrame(stats_list)
@@ -465,7 +505,6 @@ def run_full_analysis(
     z_test_patient_time = z_test(
         data_scheduled["avg_times"],
         data_walk_in["avg_times"],
-
     )
     
     z_test_overtime = z_test(
@@ -473,9 +512,15 @@ def run_full_analysis(
         data_walk_in["overtimes"]
     )
     
+    z_test_idle_time = z_test(
+        data_scheduled["idle_times"],
+        data_walk_in["idle_times"]
+    )
+    
     z_tests_df = pd.DataFrame([
         {"Metryka": "Średni czas pacjenta", **z_test_patient_time},
-        {"Metryka": "Nadgodziny", **z_test_overtime}
+        {"Metryka": "Nadgodziny", **z_test_overtime},
+        {"Metryka": "Czas bezczynności", **z_test_idle_time}
     ])
 
     aggregated_df = pd.DataFrame({
@@ -496,6 +541,14 @@ def run_full_analysis(
             np.std(data_scheduled["overtimes"]),
             np.std(data_walk_in["overtimes"])
         ],
+        "Czas bezczynności (min)": [
+            np.mean(data_scheduled["idle_times"]),
+            np.mean(data_walk_in["idle_times"])
+        ],
+        "Std czas bezczynności": [
+            np.std(data_scheduled["idle_times"]),
+            np.std(data_walk_in["idle_times"])
+        ],
         "Liczba symulacji": [num_runs, num_runs],
         "Liczba gabinetów": [num_doctors, num_doctors],
         "Liczba pacjentów": [num_patients, num_patients]
@@ -505,7 +558,8 @@ def run_full_analysis(
         "Run": list(range(num_runs)) * 2,
         "System": ["Z terminem"] * num_runs + ["Bez terminu"] * num_runs,
         "Średni_czas_pacjenta": list(data_scheduled["avg_times"]) + list(data_walk_in["avg_times"]),
-        "Nadgodziny": list(data_scheduled["overtimes"]) + list(data_walk_in["overtimes"])
+        "Nadgodziny": list(data_scheduled["overtimes"]) + list(data_walk_in["overtimes"]),
+        "Czas_bezczynności": list(data_scheduled["idle_times"]) + list(data_walk_in["idle_times"])
     })
     
     print("\n[5/7] Zapisywanie wyników do plików CSV...")
@@ -566,6 +620,17 @@ def run_full_analysis(
         print(f"\n2. Nadgodziny:")
         print(f"   Dla przyjętych parametrów BRAK ISTONIE STATYSTYCZNIE różnicy między systemami")
         print(f"   (p={z_test_overtime['Wartość p']})")
+    
+    if z_test_idle_time["Wartość p"] < 0.05:
+        diff = z_test_idle_time["Różnica średnich"]
+        winner = "Z terminem" if diff < 0 else "Bez terminu"
+        print(f"\n3. Czas bezczynności:")
+        print(f"   Dla przyjętych parametrów system '{winner}' ma ISTOTNIE STATYSTYCZNIE mniejszy czas bezczynności")
+        print(f"   (różnica: {abs(diff):.2f} min, p={z_test_idle_time['Wartość p']})")
+    else:
+        print(f"\n3. Czas bezczynności:")
+        print(f"   Dla przyjętych parametrów BRAK ISTONIE STATYSTYCZNIE różnicy między systemami")
+        print(f"   (p={z_test_idle_time['Wartość p']})")
     
     print("\n" + "=" * 70)
     print("Analiza zakończona!")
