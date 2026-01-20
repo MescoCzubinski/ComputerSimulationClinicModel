@@ -11,6 +11,7 @@ Deterministyczne:
 - Liczba okienek rejestracji (int, 1-3)
 - Liczba gabinetów (int, 1-10)
 - Liczbę pacjentów (int, 1-300)
+- sposób organizacji wizyt (czynnik badawczy)
 
 Losowe:
 - W przypadku pacjentów przychodzących z ulicy: lista pacjentów - czyli krotek z:
@@ -43,4 +44,4 @@ Porównanie przychodni w zależności od sposobu umawiania pacjentów dla danej 
 
 5. Narzędzie:
 - python,
-- SimPy
+- Numpy

@@ -172,7 +172,7 @@ if __name__ == "__main__":
     
     np.random.seed(42)
 
-    sample_size = 1000000
+    sample_size = 100
 
     print("max patients per doctor case:")
     print(get_scheduled_patients(90, 3))
