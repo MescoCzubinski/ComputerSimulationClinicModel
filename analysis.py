@@ -20,7 +20,7 @@ def run_multiple_simulations(
 ):
     """
     Przeprowadza wielokrotne symulacje i zbiera surowe dane.
-    
+
     Args:
         is_scheduled: Czy pacjenci mają umówione terminy
         runs: Liczba powtórzeń symulacji
@@ -28,10 +28,13 @@ def run_multiple_simulations(
         num_doctors: Liczba gabinetów
         num_patients: Liczba pacjentów
         verbose: Czy wyświetlać postęp
-        
+
     Returns:
         dict: Słownik z surowymi danymi z symulacji
     """
+    # Reset seed for reproducibility - ensures "Bez Terminu" results are reproducible
+    np.random.seed(42)
+
     avg_times = []
     overtimes = []
     idle_times = []
@@ -125,109 +128,6 @@ def z_test(
         f"Istotne statystycznie (α={alpha})":
             "TAK" if p_value < alpha else "NIE"
     }
-
-
-def create_histogram_plot(data1, data2, ylabel, title_prefix, filename, 
-                          color1='blue', color2='green', add_zero_line=False):
-    """
-    Tworzy wykres histogramu porównawczy dla dwóch zbiorów danych.
-    
-    Args:
-        data1: Dane dla pierwszego systemu
-        data2: Dane dla drugiego systemu
-        ylabel: Etykieta osi Y
-        title_prefix: Prefix tytułu
-        filename: Nazwa pliku do zapisu
-        color1: Kolor pierwszego histogramu
-        color2: Kolor drugiego histogramu
-        add_zero_line: Czy dodać linię na poziomie 0
-    """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-    
-    for ax, data, title, color in [
-        (ax1, data1, f'{title_prefix} - Z umawianym terminem', color1),
-        (ax2, data2, f'{title_prefix} - Bez umawiania terminu', color2)
-    ]:
-        ax.hist(data, bins=30, alpha=0.7, color=color, edgecolor='black')
-        mean_val = np.mean(data)
-        ax.axvline(mean_val, color='red', linestyle='--', linewidth=2, 
-                   label=f'Średnia: {mean_val:.2f}')
-        if add_zero_line:
-            ax.axvline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
-        ax.set_xlabel(ylabel)
-        ax.set_ylabel('Częstość')
-        ax.set_title(title)
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300, bbox_inches='tight')
-    plt.close()
-
-
-def create_comparison_plots(data_scheduled, data_walk_in):
-    """
-    Tworzy wykresy porównawcze dla obu systemów.
-    
-    Args:
-        data_scheduled: Dane z symulacji z terminami
-        data_walk_in: Dane z symulacji bez terminów
-    """
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
-    create_histogram_plot(
-        data_scheduled["avg_times"], 
-        data_walk_in["avg_times"],
-        'Średni czas pacjenta (minuty)',
-        'Średni czas pacjenta',
-        'comparison_avg_patient_time.png'
-    )
-    
-    create_histogram_plot(
-        data_scheduled["overtimes"], 
-        data_walk_in["overtimes"],
-        'Nadgodziny (minuty)',
-        'Nadgodziny',
-        'comparison_overtime.png',
-        add_zero_line=True
-    )
-    
-    create_histogram_plot(
-        data_scheduled["idle_times"], 
-        data_walk_in["idle_times"],
-        'Czas bezczynności (minuty)',
-        'Czas bezczynności',
-        'comparison_idle_time.png',
-        color1='blue',
-        color2='green'
-    )
-
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    
-    axes[0].boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], 
-                    labels=['Z terminem', 'Bez terminu'])
-    axes[0].set_ylabel('Średni czas pacjenta (minuty)')
-    axes[0].set_title('Porównanie średniego czasu pacjenta')
-    axes[0].grid(True, alpha=0.3, axis='y')
-    
-    axes[1].boxplot([data_scheduled["overtimes"], data_walk_in["overtimes"]], 
-                    labels=['Z terminem', 'Bez terminu'])
-    axes[1].axhline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
-    axes[1].set_ylabel('Nadgodziny (minuty)')
-    axes[1].set_title('Porównanie nadgodzin')
-    axes[1].grid(True, alpha=0.3, axis='y')
-    
-    axes[2].boxplot([data_scheduled["idle_times"], data_walk_in["idle_times"]], 
-                    labels=['Z terminem', 'Bez terminu'])
-    axes[2].set_ylabel('Czas bezczynności (minuty)')
-    axes[2].set_title('Porównanie czasu bezczynności')
-    axes[2].grid(True, alpha=0.3, axis='y')
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'comparison_boxplots.png'), dpi=300, bbox_inches='tight')
-    plt.close()
-    
-    print(f"\nWykresy porównawcze zapisane w katalogu '{OUTPUT_DIR}/'")
 
 
 def create_parameter_analysis_plots(results_df, filename='parameter_analysis_patients.png'):
@@ -381,62 +281,6 @@ def run_parameter_sweep_patients(num_runs, patients_range, num_registration_desk
     return results_df
 
 
-def run_parameter_sweep_doctors(num_runs, doctors_range, num_registration_desks, num_patients):
-    """
-    Przeprowadza analizę wpływu liczby gabinetów na wskaźniki przy stałej liczbie pacjentów.
-    
-    Args:
-        num_runs: Liczba powtórzeń każdej symulacji
-        doctors_range: Zakres liczby gabinetów do przetestowania
-        num_registration_desks: Liczba okienek rejestracji
-        num_patients: Stała liczba pacjentów
-        
-    Returns:
-        DataFrame: Wyniki analizy parametrów
-    """
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
-    print("\n" + "=" * 70)
-    print("ANALIZA WPŁYWU LICZBY GABINETÓW")
-    print("=" * 70)
-    print(f"\nStała liczba pacjentów: {num_patients}")
-    print(f"Zmienna liczba gabinetów: {list(doctors_range)}")
-    
-    results = []
-    
-    for i, num_doctors in enumerate(doctors_range):
-        print(f"Postęp: {round((i+1)/len(doctors_range)*100)}%", end="\r")
-        
-        for is_scheduled, system_name in [(True, "Z terminem"), (False, "Bez terminu")]:
-            data = run_multiple_simulations(
-                is_scheduled=is_scheduled,
-                runs=num_runs,
-                num_registration_desks=num_registration_desks,
-                num_doctors=num_doctors,
-                num_patients=num_patients,
-                verbose=False
-            )
-            
-            results.append({
-                "num_doctors": num_doctors,
-                "num_patients": num_patients,
-                "System": system_name,
-                "Średni czas pacjenta (min)": np.mean(data["avg_times"]),
-                "Nadgodziny (min)": np.mean(data["overtimes"]),
-                "Czas bezczynności (min)": np.mean(data["idle_times"]),
-                "Std czas pacjenta": np.std(data["avg_times"]),
-                "Std nadgodziny": np.std(data["overtimes"]),
-                "Std czas bezczynności": np.std(data["idle_times"])
-            })
-    
-    results_df = pd.DataFrame(results)
-    results_df.to_csv(os.path.join(OUTPUT_DIR, "analiza_wplyw_gabinetow.csv"), index=False, float_format='%.3f')
-    
-    print(f"\nZapisano: {os.path.join(OUTPUT_DIR, 'analiza_wplyw_gabinetow.csv')}")
-    create_doctors_analysis_plots(results_df)
-    
-    return results_df
-
 
 def run_full_analysis(
         num_runs=100,
@@ -469,7 +313,7 @@ def run_full_analysis(
     print(f"  - Liczba pacjentów: {num_patients}")
     print()
     
-    print("\n[1/7] Przeprowadzanie symulacji z umawianym terminem...")
+    print("\n[1/6] Przeprowadzanie symulacji z umawianym terminem...")
     data_scheduled = run_multiple_simulations(
         is_scheduled=True,
         runs=num_runs,
@@ -477,8 +321,8 @@ def run_full_analysis(
         num_doctors=num_doctors,
         num_patients=num_patients
     )
-    
-    print("\n[2/7] Przeprowadzanie symulacji bez umawiania terminu...")
+
+    print("\n[2/6] Przeprowadzanie symulacji bez umawiania terminu...")
     data_walk_in = run_multiple_simulations(
         is_scheduled=False,
         runs=num_runs,
@@ -486,8 +330,8 @@ def run_full_analysis(
         num_doctors=num_doctors,
         num_patients=num_patients
     )
-    
-    print("\n[3/7] Obliczanie statystyk...")
+
+    print("\n[3/6] Obliczanie statystyk...")
     
     stats_list = [
         calculate_statistics(data_scheduled["avg_times"], "Średni czas pacjenta - Z terminem"),
@@ -499,8 +343,8 @@ def run_full_analysis(
     ]
     
     stats_df = pd.DataFrame(stats_list)
-    
-    print("\n[4/7] Przeprowadzanie testów Z...")
+
+    print("\n[4/6] Przeprowadzanie testów Z...")
     
     z_test_patient_time = z_test(
         data_scheduled["avg_times"],
@@ -562,7 +406,7 @@ def run_full_analysis(
         "Czas_bezczynności": list(data_scheduled["idle_times"]) + list(data_walk_in["idle_times"])
     })
     
-    print("\n[5/7] Zapisywanie wyników do plików CSV...")
+    print("\n[5/6] Zapisywanie wyników do plików CSV...")
     
     stats_df.to_csv(os.path.join(OUTPUT_DIR, "statystyki_opisowe.csv"), index=False, float_format='%.3f')
     z_tests_df.to_csv(os.path.join(OUTPUT_DIR, "testy_statystyczne_z.csv"), index=False, float_format='%.6f')
@@ -575,12 +419,10 @@ def run_full_analysis(
     print("  - dane_zagregowane.csv")
     print("  - dane_surowe.csv")
     
-    print("\n[6/7] Generowanie wykresów porównawczych...")
-    create_comparison_plots(data_scheduled, data_walk_in)
+
     
-    print("\n[7/7] Przeprowadzanie analiz wpływu parametrów...")
+    print("\n[6/6] Przeprowadzanie analiz wpływu parametrów...")
     run_parameter_sweep_patients(num_runs, patients_range, num_registration_desks, num_doctors)
-    run_parameter_sweep_doctors(num_runs, doctors_range, num_registration_desks, num_patients)
     
     print("\n" + "=" * 70)
     print("PODSUMOWANIE WYNIKÓW")

@@ -12,7 +12,7 @@ clinic_open_time = 0
 clinic_close_time = 600  # 10 hours in minutes
 
 scheduled_registration_time_multiplier = 1.0
-run_walk_in_registration_time_multiplier = 1.5  # walk-in patients take longer at registration
+run_walk_in_registration_time_multiplier = 1.0  # walk-in patients take longer at registration
 
 
 def get_walk_in_arrival_time_dist(num_patients, p_first=0.5):
