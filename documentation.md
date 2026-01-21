@@ -2,27 +2,27 @@
 
 ## Struktura plików
 
+- `main.py` – prosty punkt wejścia wypisujący wyniki obu wariantów przychodni.
 - `distributions.py` – generowanie rozkładów czasów przyjścia, rejestracji i wizyt oraz list pacjentów.
 - `simulation.py` – rdzeń symulacji przepływu pacjentów oraz funkcje uruchamiające scenariusze.
-- `main.py` – prosty punkt wejścia wypisujący wyniki obu wariantów przychodni.
 - `analysis.py` – moduł analizy statystycznej przeprowadzający wielokrotne symulacje, testy statystyczne i generujący wykresy.
 
 ## Generatory rozkładów (`distributions.py`)
 
 - `get_walk_in_arrival_time_dist(num_patients, p_first=0.5)`  
-  Dwumodalny rozkład normalny czasów przyjścia dla pacjentów bez zapisu (piki ok. 9:00 i 14:00). Wyniki ograniczane do godzin pracy przychodni.
+  Dwumodalny rozkład normalny czasów przyjścia dla pacjentów bez zapisu (mody w 120. i 420. minucie oraz odchylenie standardowe 90 minut dla obu rozkładów). Wyniki ograniczone do godzin pracy przychodni.
 - `get_arrival_offset(num_patients)`  
-  Asymetryczny rozkład normalny przesunięć względem terminu wizyty (średnio -10 minut, prawostronny ogon) dla pacjentów umówionych.
+  Asymetryczny rozkład normalny przesunięć względem terminu wizyty (średnia -10, odchylenie 4 a alpha 4 co skutkuje prawostronnym ogonem) dla pacjentów umówionych.
 - `get_scheduled_arrival_time_dist(num_patients, num_doctors)`  
   Tworzy czasy przyjścia co 20 minut na gabinet, z dodanym przesunięciem z powyższego rozkładu.
 - `get_registration_duration_dist(num_patients, multiplier)`  
-  Czas rejestracji z rozkładu wykładniczego, skalowany mnożnikiem (dłuższa rejestracja dla pacjentów niezapowiedzianych).
+  Czas rejestracji wyliczamy z rozkładu wykładniczego o skali 1, pomnożony przez 1 dla pacjentów umówionych i 1.5 dla tych nieumówionych (symulujemy dłuższą rejestrację, gdy przychodnia kogoś nie zna) do którego dodajemy 1, by pozbyć się wartości zerowych.
 - `get_appointment_duration_dist(num_patients)`  
-  Czas trwania wizyty z rozkładu gamma (średnio 17 minut, zawsze >0).
+Czas trwania wizyty jest losowany z rozkładu gamma o kształcie 17 i skali 1 do wyniku którego dodajemy 1.
 - `get_scheduled_patients(num_patients, num_doctors)`  
-  Zwraca posortowaną listę pacjentów z umówionymi terminami: `(czas_przyjścia, czas_rejestracji, czas_wizyty)`.
+  Zwraca posortowaną po czasie przyjścia listę pacjentów z umówionymi terminami: `(czas_przyjścia, czas_rejestracji, czas_wizyty)` - gotowe dane do symulacji.
 - `get_run_walk_in_patients(num_patients)`  
-  Zwraca posortowaną listę pacjentów przychodzących bez zapisu.
+  Zwraca posortowaną po czasie przyjścia listę pacjentów przychodzących bez zapisu - gotowe dane do symulacji.
 
 ## Rdzeń symulacji (`simulation.py`)
 
@@ -64,11 +64,13 @@
 - `create_parameter_analysis_plots(results_df, filename='parameter_analysis_patients.png')`  
   Tworzy wykresy liniowe pokazujące wpływ liczby pacjentów na:
     - Średni czas pacjenta
+    - Czas bezczynnosci
     - Nadgodziny
 
 - `create_doctors_analysis_plots(results_df)`  
   Tworzy wykresy liniowe pokazujące wpływ liczby gabinetów na:
     - Średni czas pacjenta
+    - Czas bezczynnosci   
     - Nadgodziny
 
 - `run_parameter_sweep_patients(num_runs, patients_range, num_registration_desks, num_doctors)`  
@@ -124,3 +126,5 @@ Uruchamia pełną analizę z domyślnymi parametrami:
 - Testy wpływu liczby gabinetów: (1, 2, 3, ..., 10)
 
 Parametry można zmienić edytując wywołanie `run_full_analysis()` w sekcji `if __name__ == "__main__":`.
+
+
