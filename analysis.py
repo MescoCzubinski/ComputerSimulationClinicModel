@@ -140,35 +140,27 @@ def create_parameter_analysis_plots(results_df, filename='parameter_analysis_pat
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
     for system in results_df['System'].unique():
         data = results_df[results_df['System'] == system]
-        axes[0].plot(data['num_patients'], data['Średni czas pacjenta (min)'], 
+        axes[0].plot(data['num_patients'], data['Nadgodziny (min)'], 
                     marker='o', label=system, linewidth=2, markersize=6)
-        axes[1].plot(data['num_patients'], data['Nadgodziny (min)'], 
-                    marker='o', label=system, linewidth=2, markersize=6)
-        axes[2].plot(data['num_patients'], data['Czas bezczynności (min)'], 
+        axes[1].plot(data['num_patients'], data['Czas bezczynności (min)'], 
                     marker='o', label=system, linewidth=2, markersize=6)
     
     axes[0].set_xlabel('Liczba pacjentów')
-    axes[0].set_ylabel('Średni czas pacjenta (minuty)')
-    axes[0].set_title('Wpływ liczby pacjentów na czas pacjenta (num_doctors=5)')
+    axes[0].set_ylabel('Nadgodziny (minuty)')
+    axes[0].set_title('Wpływ liczby pacjentów na nadgodziny (num_doctors=5)')
+    axes[0].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
     
     axes[1].set_xlabel('Liczba pacjentów')
-    axes[1].set_ylabel('Nadgodziny (minuty)')
-    axes[1].set_title('Wpływ liczby pacjentów na nadgodziny (num_doctors=5)')
-    axes[1].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
+    axes[1].set_ylabel('Czas bezczynności (minuty)')
+    axes[1].set_title('Wpływ liczby pacjentów na czas bezczynności (num_doctors=5)')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
-    
-    axes[2].set_xlabel('Liczba pacjentów')
-    axes[2].set_ylabel('Czas bezczynności (minuty)')
-    axes[2].set_title('Wpływ liczby pacjentów na czas bezczynności (num_doctors=5)')
-    axes[2].legend()
-    axes[2].grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300, bbox_inches='tight')
