@@ -53,13 +53,13 @@ def main():
     # print("Z umawianym terminem:")
     # print(scheduled_result.idle_times, scheduled_result.avg_time)
     # pprint(scheduled_result.patient_times_total)
-    
+
     # print("\nBez umawiania terminu:")
     # print(walk_in_result.idle_times, walk_in_result.avg_time)
-    # pprint(walk_in_result.patient_times_total)    
+    # pprint(walk_in_result.patient_times_total)
 
     # """Testy statystyczne"""
-    # print("\nZ umawianym terminem:")    
+    # print("\nZ umawianym terminem:")
 
     # dataS = run_multiple_simulations(True, num_runs)
 
@@ -67,10 +67,10 @@ def main():
 
     # dataW = run_multiple_simulations(False, num_runs)
 
-    # print("\nZ umawianym terminem:")    
+    # print("\nZ umawianym terminem:")
     # print_stats(dataS["avg_times"], "Średni czas spędzony przez pacjenta")
     # print_stats(dataS["idle"], "Bezczynność gabinetów")
-    
+
     # print("\nBez umawianego terminu:")
     # print_stats(dataW["avg_times"], "Średni czas spędzony przez pacjenta")
     # print_stats(dataW["idle"], "Bezczynność gabinetów")

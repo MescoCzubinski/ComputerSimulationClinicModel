@@ -101,9 +101,9 @@ class ClinicSimulation:
                 self.doctor_idle_time[i] += (
                     dist.clinic_close_time - self.doctor_free_at[i]
                 )
-        
+
         last_finish_time = max(self.doctor_free_at)
-        overtime = last_finish_time - dist.clinic_close_time 
+        overtime = last_finish_time - dist.clinic_close_time
 
         avg_patient_time = np.mean(self.patient_times_total)
         total_idle_time = np.sum(self.doctor_idle_time)

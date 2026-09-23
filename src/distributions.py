@@ -18,7 +18,7 @@ run_walk_in_registration_time_multiplier = 1.0  # walk-in patients take longer a
 def get_walk_in_arrival_time_dist(num_patients, p_first=0.5):
     """Zwraca czasy przyjścia pacjentów bez umówionego terminu.
 
-    Czasy są próbkowane z dwumodalnego rozkładu normalnego (piki ok. 9:00 i 14:00). 
+    Czasy są próbkowane z dwumodalnego rozkładu normalnego (piki ok. 9:00 i 14:00).
     Wyniki są odrzucane, jeśli wypadają poza czasem pracy przychodni.
 
     Args:
@@ -169,7 +169,7 @@ def get_run_walk_in_patients(num_patients):
     return patients
 
 if __name__ == "__main__":
-    
+
     np.random.seed(42)
 
     sample_size = 1000000
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     plt.hist(get_appointment_duration_dist(sample_size), bins=50, density=True)
     plt.show()
 
-    print("walk-in arrival time distribution plot case:")  
+    print("walk-in arrival time distribution plot case:")
     plt.hist(get_walk_in_arrival_time_dist(sample_size), bins=50, density=True)
     plt.show()
 

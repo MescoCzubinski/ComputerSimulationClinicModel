@@ -52,7 +52,7 @@ def run_multiple_simulations(
         avg_times.append(result.avg_time)
         overtimes.append(result.overtime)
         idle_times.append(result.idle_time)
-        
+
         if verbose and (i + 1) % 10 == 0:
             print(f"Postęp: {int((i + 1) / runs * 100)}%", end='\r')
 
@@ -66,11 +66,11 @@ def run_multiple_simulations(
 def calculate_statistics(data, name=""):
     """
     Oblicza i zwraca podstawowe statystyki opisowe.
-    
+
     Args:
         data: Tablica danych
         name: Nazwa metryki
-        
+
     Returns:
         dict: Słownik ze statystykami
     """
@@ -130,11 +130,11 @@ def z_test(
     }
 
 
-def create_histogram_plot(data1, data2, ylabel, title_prefix, filename, 
+def create_histogram_plot(data1, data2, ylabel, title_prefix, filename,
                           color1='blue', color2='green', add_zero_line=False):
     """
     Tworzy wykres histogramu porównawczy dla dwóch zbiorów danych.
-    
+
     Args:
         data1: Dane dla pierwszego systemu
         data2: Dane dla drugiego systemu
@@ -146,14 +146,14 @@ def create_histogram_plot(data1, data2, ylabel, title_prefix, filename,
         add_zero_line: Czy dodać linię na poziomie 0
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-    
+
     for ax, data, title, color in [
         (ax1, data1, f'{title_prefix} - Z umawianym terminem', color1),
         (ax2, data2, f'{title_prefix} - Bez umawiania terminu', color2)
     ]:
         ax.hist(data, bins=30, alpha=0.7, color=color, edgecolor='black')
         mean_val = np.mean(data)
-        ax.axvline(mean_val, color='red', linestyle='--', linewidth=2, 
+        ax.axvline(mean_val, color='red', linestyle='--', linewidth=2,
                    label=f'Średnia: {mean_val:.2f}')
         if add_zero_line:
             ax.axvline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
@@ -162,7 +162,7 @@ def create_histogram_plot(data1, data2, ylabel, title_prefix, filename,
         ax.set_title(title)
         ax.legend()
         ax.grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300, bbox_inches='tight')
     plt.close()
@@ -171,32 +171,32 @@ def create_histogram_plot(data1, data2, ylabel, title_prefix, filename,
 def create_comparison_plots(data_scheduled, data_walk_in):
     """
     Tworzy wykresy porównawcze dla obu systemów.
-    
+
     Args:
         data_scheduled: Dane z symulacji z terminami
         data_walk_in: Dane z symulacji bez terminów
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     create_histogram_plot(
-        data_scheduled["avg_times"], 
+        data_scheduled["avg_times"],
         data_walk_in["avg_times"],
         'Średni czas pacjenta (minuty)',
         'Średni czas pacjenta',
         'comparison_avg_patient_time.png'
     )
-    
+
     create_histogram_plot(
-        data_scheduled["overtimes"], 
+        data_scheduled["overtimes"],
         data_walk_in["overtimes"],
         'Nadgodziny (minuty)',
         'Nadgodziny',
         'comparison_overtime.png',
         add_zero_line=True
     )
-    
+
     create_histogram_plot(
-        data_scheduled["idle_times"], 
+        data_scheduled["idle_times"],
         data_walk_in["idle_times"],
         'Czas bezczynności (minuty)',
         'Czas bezczynności',
@@ -206,143 +206,142 @@ def create_comparison_plots(data_scheduled, data_walk_in):
     )
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    
-    axes[0].boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], 
-                    labels=['Z terminem', 'Bez terminu'])
+
+    axes[0].boxplot([data_scheduled["avg_times"], data_walk_in["avg_times"]], tick_labels=['Z terminem', 'Bez terminu'])
     axes[0].set_ylabel('Średni czas pacjenta (minuty)')
     axes[0].set_title('Porównanie średniego czasu pacjenta')
     axes[0].grid(True, alpha=0.3, axis='y')
-    
-    axes[1].boxplot([data_scheduled["overtimes"], data_walk_in["overtimes"]], 
-                    labels=['Z terminem', 'Bez terminu'])
+
+    axes[1].boxplot([data_scheduled["overtimes"], data_walk_in["overtimes"]],
+                    tick_labels=['Z terminem', 'Bez terminu'])
     axes[1].axhline(0, color='black', linestyle='-', linewidth=1, alpha=0.5)
     axes[1].set_ylabel('Nadgodziny (minuty)')
     axes[1].set_title('Porównanie nadgodzin')
     axes[1].grid(True, alpha=0.3, axis='y')
-    
-    axes[2].boxplot([data_scheduled["idle_times"], data_walk_in["idle_times"]], 
-                    labels=['Z terminem', 'Bez terminu'])
+
+    axes[2].boxplot([data_scheduled["idle_times"], data_walk_in["idle_times"]],
+                    tick_labels=['Z terminem', 'Bez terminu'])
     axes[2].set_ylabel('Czas bezczynności (minuty)')
     axes[2].set_title('Porównanie czasu bezczynności')
     axes[2].grid(True, alpha=0.3, axis='y')
-    
+
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'comparison_boxplots.png'), dpi=300, bbox_inches='tight')
     plt.close()
-    
+
     print(f"\nWykresy porównawcze zapisane w katalogu '{OUTPUT_DIR}/'")
 
 def create_parameter_analysis_plots(results_df, filename='parameter_analysis_patients.png'):
     """
     Tworzy wykresy analizy wpływu liczby pacjentów na wskaźniki.
-    
+
     Args:
         results_df: DataFrame z wynikami dla różnych parametrów
         filename: Nazwa pliku do zapisu
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    
+
     for system in results_df['System'].unique():
         data = results_df[results_df['System'] == system]
-        axes[0].plot(data['num_patients'], data['Nadgodziny (min)'], 
+        axes[0].plot(data['num_patients'], data['Nadgodziny (min)'],
                     marker='o', label=system, linewidth=2, markersize=6)
-        axes[1].plot(data['num_patients'], data['Czas bezczynności (min)'], 
+        axes[1].plot(data['num_patients'], data['Czas bezczynności (min)'],
                     marker='o', label=system, linewidth=2, markersize=6)
-    
+
     axes[0].set_xlabel('Liczba pacjentów')
     axes[0].set_ylabel('Nadgodziny (minuty)')
     axes[0].set_title('Wpływ liczby pacjentów na nadgodziny (num_doctors=5)')
     axes[0].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
-    
+
     axes[1].set_xlabel('Liczba pacjentów')
     axes[1].set_ylabel('Czas bezczynności (minuty)')
     axes[1].set_title('Wpływ liczby pacjentów na czas bezczynności (num_doctors=5)')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, filename), dpi=300, bbox_inches='tight')
     plt.close()
-    
+
     print(f"Wykresy analizy wpływu pacjentów zapisane w katalogu '{OUTPUT_DIR}/'")
 
 
 def create_doctors_analysis_plots(results_df):
     """
     Tworzy wykresy analizy wpływu liczby gabinetów na wskaźniki.
-    
+
     Args:
         results_df: DataFrame z wynikami dla różnych liczb gabinetów
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    
+
     for system in results_df['System'].unique():
         data = results_df[results_df['System'] == system]
-        axes[0].plot(data['num_doctors'], data['Średni czas pacjenta (min)'], 
+        axes[0].plot(data['num_doctors'], data['Średni czas pacjenta (min)'],
                     marker='o', label=system, linewidth=2, markersize=6)
-        axes[1].plot(data['num_doctors'], data['Nadgodziny (min)'], 
+        axes[1].plot(data['num_doctors'], data['Nadgodziny (min)'],
                     marker='o', label=system, linewidth=2, markersize=6)
-        axes[2].plot(data['num_doctors'], data['Czas bezczynności (min)'], 
+        axes[2].plot(data['num_doctors'], data['Czas bezczynności (min)'],
                     marker='o', label=system, linewidth=2, markersize=6)
-    
+
     axes[0].set_xlabel('Liczba gabinetów')
     axes[0].set_ylabel('Średni czas pacjenta (minuty)')
     axes[0].set_title('Wpływ liczby gabinetów na czas pacjenta (num_patients=150)')
     axes[0].legend()
     axes[0].grid(True, alpha=0.3)
-    
+
     axes[1].set_xlabel('Liczba gabinetów')
     axes[1].set_ylabel('Nadgodziny (minuty)')
     axes[1].set_title('Wpływ liczby gabinetów na nadgodziny (num_patients=150)')
     axes[1].axhline(0, color='black', linestyle='--', linewidth=1, alpha=0.5)
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
-    
+
     axes[2].set_xlabel('Liczba gabinetów')
     axes[2].set_ylabel('Czas bezczynności (minuty)')
     axes[2].set_title('Wpływ liczby gabinetów na czas bezczynności (num_patients=150)')
     axes[2].legend()
     axes[2].grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, 'parameter_analysis_doctors.png'), dpi=300, bbox_inches='tight')
     plt.close()
-    
+
     print(f"Wykresy analizy wpływu gabinetów zapisane w katalogu '{OUTPUT_DIR}/'")
 
 
 def run_parameter_sweep_patients(num_runs, patients_range, num_registration_desks, num_doctors):
     """
     Przeprowadza analizę wpływu liczby pacjentów na wskaźniki przy stałej liczbie gabinetów.
-    
+
     Args:
         num_runs: Liczba powtórzeń każdej symulacji
         patients_range: Zakres liczby pacjentów do przetestowania
         num_registration_desks: Liczba okienek rejestracji
         num_doctors: Stała liczba gabinetów
-        
+
     Returns:
         DataFrame: Wyniki analizy parametrów
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     print("\n" + "=" * 70)
     print("ANALIZA WPŁYWU LICZBY PACJENTÓW")
     print("=" * 70)
     print(f"\nStała liczba gabinetów: {num_doctors}")
     print(f"Zmienna liczba pacjentów: {list(patients_range)}")
-    
+
     results = []
-    
+
     for i, num_patients in enumerate(patients_range):
         print(f"Postęp: {int((i+1)/len(patients_range)*100)}%", end="\r")
-        
+
         for is_scheduled, system_name in [(True, "Z terminem"), (False, "Bez terminu")]:
             data = run_multiple_simulations(
                 is_scheduled=is_scheduled,
@@ -352,7 +351,7 @@ def run_parameter_sweep_patients(num_runs, patients_range, num_registration_desk
                 num_patients=num_patients,
                 verbose=False
             )
-            
+
             results.append({
                 "num_doctors": num_doctors,
                 "num_patients": num_patients,
@@ -364,14 +363,14 @@ def run_parameter_sweep_patients(num_runs, patients_range, num_registration_desk
                 "Std nadgodziny": np.std(data["overtimes"]),
                 "Std czas bezczynności": np.std(data["idle_times"])
             })
-    
+
     results_df = pd.DataFrame(results)
     results_df.to_csv(os.path.join(OUTPUT_DIR, "analiza_wplyw_pacjentow.csv"), index=False, float_format='%.3f')
-    
+
     print(f"\nZapisano: {os.path.join(OUTPUT_DIR, 'analiza_wplyw_pacjentow.csv')}")
 
     create_parameter_analysis_plots(results_df, 'parameter_analysis_patients.png')
-    
+
     return results_df
 
 
@@ -386,7 +385,7 @@ def run_full_analysis(
 ):
     """
     Przeprowadza pełną analizę symulacji i generuje wszystkie wyniki.
-    
+
     Args:
         num_runs: Liczba powtórzeń każdej symulacji
         num_registration_desks: Liczba okienek rejestracji
@@ -396,7 +395,7 @@ def run_full_analysis(
         doctors_range: Zakres liczby gabinetów dla analizy parametrów
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
+
     print("=" * 70)
     print("ANALIZA SYMULACJI PRZYCHODNI")
     print("=" * 70)
@@ -406,7 +405,7 @@ def run_full_analysis(
     print(f"  - Liczba gabinetów: {num_doctors}")
     print(f"  - Liczba pacjentów: {num_patients}")
     print()
-    
+
     print("\n[1/7] Przeprowadzanie symulacji z umawianym terminem...")
     data_scheduled = run_multiple_simulations(
         is_scheduled=True,
@@ -426,7 +425,7 @@ def run_full_analysis(
     )
 
     print("\n[3/7] Obliczanie statystyk...")
-    
+
     stats_list = [
         calculate_statistics(data_scheduled["avg_times"], "Średni czas pacjenta - Z terminem"),
         calculate_statistics(data_scheduled["overtimes"], "Nadgodziny - Z terminem"),
@@ -435,26 +434,26 @@ def run_full_analysis(
         calculate_statistics(data_walk_in["overtimes"], "Nadgodziny - Bez terminu"),
         calculate_statistics(data_walk_in["idle_times"], "Czas bezczynności - Bez terminu")
     ]
-    
+
     stats_df = pd.DataFrame(stats_list)
 
     print("\n[4/7] Przeprowadzanie testów Z...")
-    
+
     z_test_patient_time = z_test(
         data_scheduled["avg_times"],
         data_walk_in["avg_times"],
     )
-    
+
     z_test_overtime = z_test(
         data_scheduled["overtimes"],
         data_walk_in["overtimes"]
     )
-    
+
     z_test_idle_time = z_test(
         data_scheduled["idle_times"],
         data_walk_in["idle_times"]
     )
-    
+
     z_tests_df = pd.DataFrame([
         {"Metryka": "Średni czas pacjenta", **z_test_patient_time},
         {"Metryka": "Nadgodziny", **z_test_overtime},
@@ -491,7 +490,7 @@ def run_full_analysis(
         "Liczba gabinetów": [num_doctors, num_doctors],
         "Liczba pacjentów": [num_patients, num_patients]
     })
-    
+
     raw_df = pd.DataFrame({
         "Run": list(range(num_runs)) * 2,
         "System": ["Z terminem"] * num_runs + ["Bez terminu"] * num_runs,
@@ -499,40 +498,40 @@ def run_full_analysis(
         "Nadgodziny": list(data_scheduled["overtimes"]) + list(data_walk_in["overtimes"]),
         "Czas_bezczynności": list(data_scheduled["idle_times"]) + list(data_walk_in["idle_times"])
     })
-    
+
     print("\n[5/7] Zapisywanie wyników do plików CSV...")
-    
+
     stats_df.to_csv(os.path.join(OUTPUT_DIR, "statystyki_opisowe.csv"), index=False, float_format='%.3f')
     z_tests_df.to_csv(os.path.join(OUTPUT_DIR, "testy_statystyczne_z.csv"), index=False, float_format='%.6f')
     aggregated_df.to_csv(os.path.join(OUTPUT_DIR, "dane_zagregowane.csv"), index=False, float_format='%.3f')
     raw_df.to_csv(os.path.join(OUTPUT_DIR, "dane_surowe.csv"), index=False, float_format='%.3f')
-    
+
     print(f"\nZapisano pliki CSV w katalogu '{OUTPUT_DIR}/':")
     print("  - statystyki_opisowe.csv")
     print("  - testy_statystyczne_z.csv")
     print("  - dane_zagregowane.csv")
     print("  - dane_surowe.csv")
-    
+
     print("\n[6/7] Generowanie wykresów porównawczych...")
     create_comparison_plots(data_scheduled, data_walk_in)
-    
+
 
     print("\n[7/7] Przeprowadzanie analiz wpływu parametrów...")
     run_parameter_sweep_patients(num_runs, patients_range, num_registration_desks, num_doctors)
-    
+
     print("\n" + "=" * 70)
     print("PODSUMOWANIE WYNIKÓW")
     print("=" * 70)
-    
+
     print("\nSTATYSTYKI OPISOWE:")
     print(stats_df.to_string(index=False))
-    
+
     print("\n\nTESTY STATYSTYCZNE Z:")
     print(z_tests_df.to_string(index=False))
-    
+
     print("\n\nDANE ZAGREGOWANE:")
     print(aggregated_df.to_string(index=False))
-    
+
     print("\n" + "=" * 70)
     print("WNIOSKI:")
     print("=" * 70)
@@ -547,7 +546,7 @@ def run_full_analysis(
         print(f"\n1. Średni czas pacjenta:")
         print(f"   Dla przyjętych parametrów BRAK ISTONIE STATYSTYCZNIE różnicy między systemami")
         print(f"   (p={z_test_patient_time['Wartość p']})")
-    
+
     if z_test_overtime["Wartość p"] < 0.05:
         diff = z_test_overtime["Różnica średnich"]
         winner = "Z terminem" if diff < 0 else "Bez terminu"
@@ -558,7 +557,7 @@ def run_full_analysis(
         print(f"\n2. Nadgodziny:")
         print(f"   Dla przyjętych parametrów BRAK ISTONIE STATYSTYCZNIE różnicy między systemami")
         print(f"   (p={z_test_overtime['Wartość p']})")
-    
+
     if z_test_idle_time["Wartość p"] < 0.05:
         diff = z_test_idle_time["Różnica średnich"]
         winner = "Z terminem" if diff < 0 else "Bez terminu"
@@ -569,7 +568,7 @@ def run_full_analysis(
         print(f"\n3. Czas bezczynności:")
         print(f"   Dla przyjętych parametrów BRAK ISTONIE STATYSTYCZNIE różnicy między systemami")
         print(f"   (p={z_test_idle_time['Wartość p']})")
-    
+
     print("\n" + "=" * 70)
     print("Analiza zakończona!")
     print("=" * 70)
@@ -577,7 +576,7 @@ def run_full_analysis(
 
 if __name__ == "__main__":
     np.random.seed(42)
-    
+
     run_full_analysis(
         num_runs=100,
         num_registration_desks=2,

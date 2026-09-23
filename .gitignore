@@ -1,8 +1,2 @@
-__pycache__/*
 __pycache__/
-pycache/
-pycache/*
-.env
-.venv
-*.pyc
-.idea
+.direnv/
